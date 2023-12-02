@@ -1,6 +1,6 @@
 from re import search
 
-input = "C:\\Code\\AdventOfCode\\day1\\test.txt"
+input = "C:\\Code\\AdventOfCode\\day1\\data.txt"
 
 sum = 0
 
@@ -30,72 +30,93 @@ num_map = {
     "nine":9,
 }
 
-format_num = lambda x: num_map[x] if x in num_map else x
-
-word_candidates = ["o","on","one","t","tw","two","th","thr","thre","three","f","fo","fou","four",\
-                   "fi","fiv","five","s","si","six","se","sev","seve","seven","e","ei","eig","eigh","eight","n","ni","nin","nine"]
-rev_word_candidates = ["e","en","eno","o","ow","owt","ee","eer","eerh","eerht","r","ru","ruo","ruof",\
-                       "ev","evi","evif","x","xi","xis","n","ne","nev","neve","neves","t","th","thg","thgi","thgie","eni","enin"]
-
-## TRY: looping through each letter and looking ahead up to 4 extra letters to find potential words
-# (use pointers for this instead of just looping through the list)
-
 with open(input) as raw_file:
     for line in raw_file:
-        print(f"line: {line}")
 
-        ## find the first number
-        first_word = "" # track number words (e.g. "one", "two")
-        first_digit = 0
+        first_num = 0
+        second_num = 0
+        first_word = ""
+        second_word = ""
 
-        for letter in line:
-            if not(letter.isdigit()):
-                first_word += letter
-                print(first_word)
-                if first_word not in word_candidates:
-                    first_word = letter
-                elif first_word in num_map:
-                    break
-            else:
-                first_digit = letter
+        # track the index positions of the first word and digit
+        # these start at infinity because we are trying to find the lowest one
+        first_word_i = float("inf")
+        first_digit_i = float("inf")
+
+        # find index position of first digit
+        for i in range(len(line)):
+            if line[i].isdigit():
+                first_digit_i = i
                 break
-        
-        # if we have found a digit first, use this
-        if first_digit:
-            first_num = first_digit
-        # otherwise we must have found a word first, so use this
+
+        # find index position of first word
+        for i in range(len(line)-2):
+            # if we go past the first digit, then we can stop
+            if i >= first_digit_i:
+                break
+            word = str(line[i]) + str(line[i+1]) + (line[i+2])
+            try:
+                if word in num_map:
+                    first_word_i = i
+                    first_word = word
+                    break
+                elif word + str(line[i+3]) in num_map:
+                    first_word_i = i
+                    first_word = word + str(line[i+3])
+                    break
+                elif word + str(line[i+3]) + str(line[i+4]) in num_map:
+                    first_word_i = i
+                    first_word = word + str(line[i+3]) + str(line[i+4])
+                    break
+            # we search past the end of the line, therefore word is not found
+            except IndexError:
+                break
+
+        if first_digit_i < first_word_i:
+            first_num = line[first_digit_i]
         else:
             first_num = num_map[first_word]
-        ## first number found
 
+        # index positions for the second word and digit
+        # we search backwards so they start at 0 (trying to find the highest)
+        second_word_i = 0
+        second_digit_i = 0
 
-        ## find the last number
-        last_word = ""
-        last_digit = 0
-
-        for letter in reversed(line):
-            if not(letter.isdigit()):
-                last_word += letter
-                if last_word not in rev_word_candidates:
-                    last_word = letter
-                elif last_word[::-1] in num_map:
-                    break
-            else:
-                last_digit = letter
+        # find index position of second digit
+        for i in reversed(range(len(line))):
+            if line[i].isdigit():
+                second_digit_i = i
                 break
-        
-        # if we have found a digit first, use this
-        if last_digit:
-            last_num = last_digit
-        # otherwise we must have found a word first, so use this
+
+        # find index position of second word
+        for i in reversed(range(2,len(line))):
+            # if we go past the second digit, then we can stop
+            if i <= second_digit_i:
+                break
+            word = str(line[i-2]) + str(line[i-1]) + (line[i]) # assemble the word backwards
+            try:
+                if word in num_map:
+                    second_word_i = i
+                    second_word = word
+                    break
+                elif str(line[i-3]) + word in num_map:
+                    second_word_i = i
+                    second_word = str(line[i-3]) + word
+                    break
+                elif str(line[i-4]) + str(line[i-3]) + word in num_map:
+                    second_word_i = i
+                    second_word = str(line[i-4]) + str(line[i-3]) + word
+                    break
+            # we search past the end of the line, therefore word is not found
+            except IndexError:
+                break
+
+        if second_digit_i >= second_word_i:
+            second_num = line[second_digit_i]
         else:
-            last_num = num_map[last_word[::-1]]
-        ## last number found
+            second_num = num_map[second_word]
 
-        print(f"first_num: {first_num}")
-        print(f"last_num: {last_num}")
-
-        concat_num = int(str(first_num) + str(last_num))
+        concat_num = int(str(first_num) + str(second_num))
         sum += concat_num
 
 print(sum)
