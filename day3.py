@@ -88,56 +88,6 @@ def check_downright(matrix, row, col):
     else:
         return False
 
-# check if a gear "*" is adjacent to exactly 2 numbers
-def check_gear(matrix, row, col):
-    # try every direction, if any are out of bounds just set to None
-    try:
-        left = matrix[row][col-1]
-    except IndexError:
-        left = None
-    try:
-        right = matrix[row][col+1]
-    except IndexError:
-        right = None
-    try:
-        up = matrix[row-1][col]
-    except IndexError:
-        up = None
-    try:
-        down = matrix[row+1][col]
-    except IndexError:
-        down = None
-    try:
-        upleft = matrix[row-1][col-1]
-    except IndexError:
-        upleft = None
-    try:
-        upright = matrix[row-1][col+1]
-    except IndexError:
-        upright = None
-    try:
-        downleft = matrix[row+1][col-1]
-    except IndexError:
-        downleft = None
-    try:
-        downright = matrix[row+1][col+1]
-    except IndexError:
-        downright = None
-    # for a gear to be adjacent to exactly 2 numbers, need one of the following (with all others False):
-    # 1. up and down
-    # 2. left and right
-    # 3. upleft and downright
-    # 5. upleft and upright
-    # 6. upright and downleft
-    # 7. downleft and downright
-    # 8. all ups and all downs
-    # 9. upleft and up and down and downright
-    # 10. up and upright and downleft and down
-    # 11. upleft and up and any down
-    # 12. up and upright and any down
-    # 13. all ups and any down
-    # 14. 
-
 
 path = import_path(3)
 # path = test_path(3)
@@ -189,3 +139,9 @@ for row in range(len(schematic)):
             save_num = False
 
 print(f"pt1: {pt1}")
+
+
+## TRY: PT 2
+# 1. function that fills in a number from finding one digit (by going left and right along the row)
+# 2. store the index positions and values of each number in a dict, to prevent double counting of overlapping numbers
+# 3. store the index positions of each "*" and compare to the dict in [2]
