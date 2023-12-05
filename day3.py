@@ -138,10 +138,66 @@ for row in range(len(schematic)):
             current_num = ""
             save_num = False
 
-print(f"pt1: {pt1}")
+# print(f"pt1: {pt1}")
 
 
 ## TRY: PT 2
 # 1. function that fills in a number from finding one digit (by going left and right along the row)
 # 2. store the index positions and values of each number in a dict, to prevent double counting of overlapping numbers
 # 3. store the index positions of each "*" and compare to the dict in [2]
+
+# looks for the leftmost digit of a number and fills in the rest along the row
+# returns the number and index position
+def expand_num(matrix, row, col):
+    start_col = col
+    number = str(matrix[row][col])
+    # loop as long as the element is a number, and we aren't at the end of the row
+    while matrix[row][col].isdigit() and col < len(matrix[row])-1:
+        col += 1
+        if matrix[row][col].isdigit():
+            number += str(matrix[row][col])
+    # return the number and its position as a list
+    return [number, (row, start_col)]
+
+num_positions = {}
+gear_positions = {}
+
+for row in range(len(schematic)):
+    for col in range(len(schematic[row])):
+        # find numbers and populate their positions in a dict
+        if schematic[row][col].isdigit():
+            # look one element behind, if this isn't a number then we must be at the start of a number
+            if not(schematic[row][col-1].isdigit()) and col > 0:
+                num_data = expand_num(schematic, row, col)
+            # if we are at the start of a row, it must be the start of a number
+            if col == 0:
+                num_data = expand_num(schematic, row, col)
+            num_positions[num_data[1]] = num_data[0]
+        # find gears and populate their positions in a dict
+        elif schematic[row][col] == "*":
+            gear_positions[(row, col)] = 1
+
+sum_ratios = 0
+
+# for a gear to be adjacent to a number, both the row and col need to be within 1 of a number's row/col
+for gear in gear_positions:
+    adj_count = 0 # count how many numbers this gear is adjacent to
+    gear_ratio = 1
+    gear_row = gear[0]
+    gear_col = gear[1]
+    for num in num_positions:
+        adjacent = False # check if a gear/number pair is adjacent
+        num_len = len(num_positions[num])
+        num_row = num[0]
+        start_col = num[1]
+        # loop through the full range of the number, from start to end
+        for col in range(start_col,start_col+num_len):
+            if abs(gear_row - num_row) < 2 and abs(gear_col - col) < 2:
+                adjacent = True
+        if adjacent:
+            adj_count += 1
+            gear_ratio *= int(num_positions[num]) # find gear ratio by multiplying by the adjacent numbers
+    if adj_count == 2:
+        sum_ratios += gear_ratio
+
+print(f"pt2: {sum_ratios}")
